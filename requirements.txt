@@ -1,9 +1,7 @@
-# 使用经过验证的稳定版本组合
+# 核心依赖
 streamlit==1.58.0
-tensorflow-cpu==2.13.0
+tensorflow==2.13.0
 numpy==1.24.3
-opencv-python-headless==4.10.0.84
+opencv-python-headless==4.8.0.76
 requests
-streamlit-drawable-canvas
-fastapi
-uvicorn
+streamlit-drawable-canvas==0.9.3
