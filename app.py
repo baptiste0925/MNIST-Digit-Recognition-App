@@ -105,31 +105,34 @@ if predict_btn and canvas_result.image_data is not None:
 
     payload = {"data": final_input.flatten().tolist()}
 
-    try:
-        # 注意：在本地是 localhost，在云端也是 localhost (因为都在同一个容器内)
-        response = requests.post("http://localhost:8000/predict_json", json=payload)
-        data = response.json()
+   try:
+            # ... (前面的预处理代码保持不变) ...
+            
+            response = requests.post("http://localhost:8000/predict_json", json=payload)
+            data = response.json()
 
-        predicted_digit = data.get('result', '?')
-        confidence = data.get('confidence', 0)
+            #  修正：从后端返回的 'percent' 列表中找到最大值作为置信度
+            predicted_digit = data.get('result', '?')
+            probabilities = data.get('percent', [0]*10) # 获取10个类别的概率
+            confidence = max(probabilities) #  置信度就是最高概率
 
-        st.markdown(f"""
-            <div class="result-card">
-                <div class="confidence-label">Model Prediction</div>
-                <div class="prediction-number">{predicted_digit}</div>
-                <div style="margin-top: 20px;">
-                    <p style="color: #7f8c8d; margin-bottom: 5px;">Confidence Score</p>
+            st.markdown(f"""
+                <div class="result-card">
+                    <div class="confidence-label">Model Prediction</div>
+                    <div class="prediction-number">{predicted_digit}</div>
+                    <div style="margin-top: 20px;">
+                        <p style="color: #7f8c8d; margin-bottom: 5px;">Confidence Score</p>
+                    </div>
                 </div>
-            </div>
-        """, unsafe_allow_html=True)
+            """, unsafe_allow_html=True)
 
-        st.progress(confidence, text=f"Accuracy: {confidence * 100:.2f}%")
+            st.progress(confidence, text=f"Accuracy: {confidence * 100:.2f}%")
 
-        if 'percent' in data:
+            #  修正：这里可以直接使用 probabilities，避免重复计算
             st.caption("Probability Distribution:")
-            st.bar_chart(data['percent'])
+            st.bar_chart(probabilities)
 
-    except Exception as e:
+        except Exception as e:
         st.error(f"⚠️ Connection Error: {e}")
         st.info("Backend might still be loading the model. Please wait a moment.")
 
